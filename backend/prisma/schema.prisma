@@ -1,0 +1,82 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DATABASE_URL")
+}
+
+enum Role {
+    ADMIN
+    STAFF
+}
+
+enum EmailStatus {
+    PENDING
+    SENT
+    DELIVERED
+    BOUNCED
+    FAILED
+}
+
+enum NotificationType {
+    MISSING_DOCUMENTS
+    EMAIL_FAILED
+    EMAIL_BOUNCED
+    GENERAL
+}
+
+model User {
+    id            String         @id @default(cuid())
+    name          String
+    email         String         @unique
+    passwordHash  String
+    role          Role           @default(STAFF)
+    createdAt     DateTime       @default(now())
+    emailLogs     EmailLog[]     @relation("SentBy")
+    notifications Notification[] @relation("AssignedTo")
+}
+
+model Client {
+    id            String         @id @default(cuid())
+    name          String
+    email         String
+    company       String?
+    createdAt     DateTime       @default(now())
+    emailLogs     EmailLog[]
+    notifications Notification[]
+}
+
+model EmailLog {
+    id           String      @id @default(cuid())
+    client       Client      @relation(fields: [clientId], references: [id])
+    clientId     String
+    sentBy       User        @relation("SentBy", fields: [sentById], references: [id])
+    sentById     String
+    subject      String
+    body         String
+    status       EmailStatus @default(PENDING)
+    resendId     String?
+    errorMessage String?
+    createdAt    DateTime    @default(now())
+    updatedAt    DateTime    @updatedAt
+
+    @@index([clientId])
+    @@index([resendId])
+}
+
+model Notification {
+    id           String           @id @default(cuid())
+    type         NotificationType @default(GENERAL)
+    message      String
+    isRead       Boolean          @default(false)
+    client       Client?          @relation(fields: [clientId], references: [id])
+    clientId     String?
+    assignedTo   User?            @relation("AssignedTo", fields: [assignedToId], references: [id])
+    assignedToId String?
+    createdAt    DateTime         @default(now())
+
+    @@index([isRead])
+}
