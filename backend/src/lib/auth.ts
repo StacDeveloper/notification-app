@@ -14,7 +14,7 @@ export interface JwtPayload {
 }
 
 export class JwtAuth {
-    static async plain(plain: string): Promise<String> {
+    static async hashPassword(plain: string): Promise<String> {
         return bcrypt.hash(plain, 10)
     }
     static async verifyPassword(plain: string, hash: string): Promise<boolean> {
