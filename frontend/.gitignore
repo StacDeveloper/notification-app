@@ -9,7 +9,11 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+.gitignore
+.env.local
+.env.*
+.env
+.env.production
 # testing
 /coverage
 
