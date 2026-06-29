@@ -1,6 +1,5 @@
 "use client"
-
-import { Notification } from "@/types/types"
+import type { Notification } from "../types/types"
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react"
 import { API_URL, useAuthContext } from "./AuthContext"
 import axios from "axios"
@@ -23,7 +22,9 @@ const NotificationContext = createContext<NotificationContextValue | undefined>(
 
 export const useNotificationContext = () => {
     const context = useContext(NotificationContext)
-    if (!context) return "Notification Context Not Found"
+    if (!context) {
+        throw new Error("Failed to setup Notification context")
+    }
     return context
 }
 

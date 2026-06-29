@@ -1,11 +1,12 @@
+"use client"
 import { createContext, useContext, useCallback, useState, type ReactNode, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { User } from "@/types/types"
+import type { User } from "../types/types"
 import axios from "axios"
 import toast from "react-hot-toast"
 
 
-export const API_URL = "http://localhost:3000/api"
+export const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL! || "http://localhost:3000/api"
 
 
 interface AuthContextValue {
@@ -13,6 +14,7 @@ interface AuthContextValue {
     loading: boolean
     login: (email: string, password: string) => void
     logout: () => void
+    register: (name: string, email: string, password: string) => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -34,7 +36,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const me = useCallback(async () => {
         setLoading(true)
         try {
-            const data = await axios.get(`$${API_URL}/auth/findme`)
+            const data = await axios.get(`${API_URL}/auth/findme`)
             if (!data.data.success) {
                 toast.error(data.data.message)
             }
@@ -68,6 +70,10 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         router.push("/login")
     }, [router])
 
+    const register = useCallback(async (name: string, email: string, password: string) => {
+        const {data} = await axios.post(`${API_URL}/auth/`)
+    }, [])
+
     useEffect(() => {
         me()
     }, [me])
@@ -79,7 +85,9 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout
     }
-    return <AuthContext.Provider value={value}>
-        {children}
-    </AuthContext.Provider>
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
