@@ -8,6 +8,6 @@ const auth = new Auth()
 authRoutes.post("/login", auth.login)
 authRoutes.post("/logout", auth.logout)
 authRoutes.get("/findMe", auth.findMe)
-
+authRoutes.post("/register", auth.register)
 
 export default authRoutes
