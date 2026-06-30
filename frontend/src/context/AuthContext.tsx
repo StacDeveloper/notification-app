@@ -2,9 +2,11 @@
 import { createContext, useContext, useCallback, useState, type ReactNode, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import type { User } from "../types/types"
+
 import axios from "axios"
 import toast from "react-hot-toast"
 
+axios.defaults.withCredentials = true
 
 export const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL! || "http://localhost:3000/api"
 
@@ -28,6 +30,7 @@ export const useAuthContext = () => {
 }
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
+
     const [user, setUser] = useState<User | null>(null)
     const [loading, setLoading] = useState<boolean>(false)
     const router = useRouter()
@@ -36,13 +39,13 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const me = useCallback(async () => {
         setLoading(true)
         try {
-            const data = await axios.get(`${API_URL}/auth/findme`)
-            if (!data.data.success) {
-                toast.error(data.data.message)
+            const { data } = await axios.get(`${API_URL}/auth/findme`,{withCredentials:true})
+            if (!data.success) {
+                toast.error(data.message)
             }
-            setUser(data.data.data)
+            setUser(data.success ? data.data : null)
         } catch (error) {
-
+            console.log(error)
         } finally {
             setLoading(false)
         }
@@ -51,10 +54,12 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
 
     const login = useCallback(async (email: string, password: string) => {
+        console.log("req.received")
         try {
-            const post = await axios.post(`${API_URL}/auth/login`, { email, password })
-            if (!post.data.token) return toast.error(post.data.message)
-            await me().then(() => toast.success(`Login Success`))
+            const submit = await axios.post(`${API_URL}/auth/login`, { email, password },{withCredentials:true})
+            console.log(submit)
+            const after = await me().then(() => toast.success(`Login Success`))
+            console.log(after)
 
         } catch (error: any) {
             console.log(error)
@@ -71,7 +76,11 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     }, [router])
 
     const register = useCallback(async (name: string, email: string, password: string) => {
-        const {data} = await axios.post(`${API_URL}/auth/`)
+        const { data } = await axios.post(`${API_URL}/auth/register`, { name, email, password })
+        if (data.success) {
+            router.push("/dashboard")
+        }
+        toast.error("Failed to register")
     }, [])
 
     useEffect(() => {
@@ -83,7 +92,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         user,
         loading,
         login,
-        logout
+        logout,
+        register
     }
     return (
         <AuthContext.Provider value={value}>

@@ -7,11 +7,15 @@ import emailRoutes from "./routes/email.routes"
 import notificationRoutes from "./routes/notification.routes"
 import webHookRoutes from "./routes/webhook.routes"
 import cookieParser from "cookie-parser"
+import cors from "cors"
 dotenv.config()
 
 const app = express()
 const port: number = Number(process.env.PORT) || 3000
-
+app.use(cors({
+    origin:process.env.ORIGIN!,
+    credentials:true
+}))
 app.use(express.json())
 app.use(cookieParser())
 app.use("/api/auth", authRoutes)
