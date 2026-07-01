@@ -21,7 +21,7 @@ export class JwtAuth {
         return bcrypt.compare(plain, hash)
     }
     static async signToken(payload: JwtPayload) {
-        return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" })
+        return jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" })
     }
     static async verifyToken(token: string): Promise<JwtPayload> {
         return jwt.verify(token, JWT_SECRET) as JwtPayload

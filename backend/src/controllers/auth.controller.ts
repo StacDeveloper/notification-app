@@ -27,9 +27,9 @@ export class Auth {
             return res.status(400).json({ success: false, message: "Invalid email or password format" })
         }
         const { email, password } = parsed.data
-        console.log(email, password)
+        
         const user = await prisma.user.findUnique({ where: { email } })
-        console.log(user)
+       
         if (!user) {
             return res.status(401).json({ success: false, message: "User not found" })
         }
@@ -38,14 +38,14 @@ export class Auth {
             return res.status(400).json({ success: false, message: "Invalid credentials" })
         }
         const token = await JwtAuth.signToken({ userId: user.id, role: user.role })
-        console.log(token)
+        
          res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
-        return res.status(200).json({success:true, message:"Login Successful", token})
+        return res.status(200).json({success:true, message:"Login Successful"})
 
     }
     async logout(req: Request, res: Response) {
@@ -59,7 +59,7 @@ export class Auth {
         if(!id){
             return res.status(400).json({success:false, message:"Id did not received"})
         }
-        console.log(id)
+        
         const user = await prisma.user.findUnique({
             where: { id: id },
             select: { id: true, name: true, email: true, role: true }
