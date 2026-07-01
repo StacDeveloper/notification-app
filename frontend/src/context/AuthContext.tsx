@@ -3,12 +3,11 @@ import { createContext, useContext, useCallback, useState, type ReactNode, useEf
 import { useRouter } from "next/navigation"
 import type { User } from "../types/types"
 
-import axios from "axios"
 import toast from "react-hot-toast"
+import api from "@/lib/axios"
 
-axios.defaults.withCredentials = true
 
-export const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL! || "http://localhost:3000/api"
+export const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL! || "http://localhost:4000/api"
 
 
 interface AuthContextValue {
@@ -39,7 +38,8 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const me = useCallback(async () => {
         setLoading(true)
         try {
-            const { data } = await axios.get(`${API_URL}/auth/findme`,{withCredentials:true})
+            const { data } = await api.get("/auth/findMe")
+            console.log(data)
             if (!data.success) {
                 toast.error(data.message)
             }
@@ -54,11 +54,12 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
 
     const login = useCallback(async (email: string, password: string) => {
+        console.log("API URL:", process.env.NEXT_PUBLIC_BACKEND_URL)
         console.log("req.received")
         try {
-            const submit = await axios.post(`${API_URL}/auth/login`, { email, password },{withCredentials:true})
+            const submit = await api.post("/auth/login", { email, password })
             console.log(submit)
-            const after = await me().then(() => toast.success(`Login Success`))
+            const after = await me()
             console.log(after)
 
         } catch (error: any) {
@@ -70,13 +71,13 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
 
     const logout = useCallback(async () => {
-        await axios.post(`${API_URL}/auth/logout`)
+        await api.post("/auth/logout")
         setUser(null)
         router.push("/login")
     }, [router])
 
     const register = useCallback(async (name: string, email: string, password: string) => {
-        const { data } = await axios.post(`${API_URL}/auth/register`, { name, email, password })
+        const { data } = await api.post("/auth/register", { name, email, password })
         if (data.success) {
             router.push("/dashboard")
         }

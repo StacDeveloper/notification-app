@@ -45,7 +45,7 @@ export class Auth {
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
-        return res.status(200).json({success:true, message:"Login Successful"})
+        return res.status(200).json({success:true, message:"Login Successful", token})
 
     }
     async logout(req: Request, res: Response) {
@@ -55,7 +55,11 @@ export class Auth {
 
     async findMe(req: Request, res: Response) {
         console.log("req.received")
-        const id = req.user?.userId
+        const id = req.user!.userId || "id not received"
+        if(!id){
+            return res.status(400).json({success:false, message:"Id did not received"})
+        }
+        console.log(id)
         const user = await prisma.user.findUnique({
             where: { id: id },
             select: { id: true, name: true, email: true, role: true }

@@ -15,7 +15,7 @@ export class Notifications {
         if (!parsed.success) {
             return res.status(400).json({ success: false, message: parsed.error.flatten() || "Invalid Data" })
         }
-        const data = parsed.data as any
+        const data = parsed.data as any 
         const notification = await prisma.notification.create({ data: data })
         return res.status(200).json({ success: true, data: notification })
     }

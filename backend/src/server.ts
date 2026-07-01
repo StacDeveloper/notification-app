@@ -11,7 +11,7 @@ import cors from "cors"
 dotenv.config()
 
 const app = express()
-const port: number = Number(process.env.PORT) || 3000
+const port: number = Number(process.env.PORT) || 4000
 app.use(cors({
     origin:process.env.ORIGIN!,
     credentials:true

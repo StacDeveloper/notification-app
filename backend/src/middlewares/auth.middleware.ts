@@ -7,7 +7,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         return res.status(400).json({ success: false, message: "Not authenticated" })
     }
     try {
-        req.user = JwtAuth.verifyToken(token)
+        req.user = await JwtAuth.verifyToken(token)
         next()
     } catch (error) {
         return res.status(401).json({ error: "Invalid or expired session" });
