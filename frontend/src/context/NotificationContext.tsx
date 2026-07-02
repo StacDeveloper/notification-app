@@ -5,6 +5,7 @@ import { API_URL, useAuthContext } from "./AuthContext"
 import axios from "axios"
 import toast from "react-hot-toast"
 import { usePolling } from "@/hooks/polling"
+import api from "@/lib/axios"
 
 interface NotificationUpdateResponse {
     notification: Notification[]
@@ -37,7 +38,7 @@ export const NotificationProvier = ({ children }: { children: ReactNode }) => {
 
     const getNotification = async () => {
         try {
-            const data = await axios.get(`${API_URL}/notification`)
+            const data = await api.get("/notification/get-all-notifications")
             if (!data.data.success) return toast.error(data.data.message)
             setNotification(data.data.data)
         } catch (error: any) {
@@ -60,7 +61,7 @@ export const NotificationProvier = ({ children }: { children: ReactNode }) => {
     usePolling(async () => {
         if (!user) return
         try {
-            const { data } = await axios.get(`${API_URL}/notification/get-all-notifications/get-all-notifications`)
+            const { data } = await api.get("notification/get-updates")
             sinceRef.current = data.serverTime
             if (data.data.length > 0) {
                 setNotification((prev) => {
@@ -78,7 +79,7 @@ export const NotificationProvier = ({ children }: { children: ReactNode }) => {
     const markAsRead = useCallback(async (id: string) => {
         setNotification((prev) => prev.map((not) => not.id === id ? { ...not, read: false } : not))
         try {
-            await axios.post(`${API_URL}/notifications/${id}/read`)
+            await api.get(`notification/${id}/read`)
         } catch (error: any) {
             console.log(error || "Failed to post read data")
             toast.error(error)

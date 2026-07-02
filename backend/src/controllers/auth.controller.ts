@@ -54,7 +54,7 @@ export class Auth {
     }
 
     async findMe(req: Request, res: Response) {
-        console.log("req.received")
+        
         const id = req.user!.userId || "id not received"
         if(!id){
             return res.status(400).json({success:false, message:"Id did not received"})

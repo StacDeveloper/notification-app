@@ -2,12 +2,12 @@ import React from 'react'
 import type { EmailStatus } from '../types/types'
 
 const Styles: Record<string, { bg: string, fg: string, label: string }> = {
-    Pending: {
+    PENDING: {
         bg: "var(--warning-bg)",
         fg: "var(--warning)",
         label: "Pending"
     },
-    Sent: {
+    SENT: {
         bg: "var(--info-bg)",
         fg: "var(--info)",
         label: "Sent"

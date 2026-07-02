@@ -22,7 +22,7 @@ export class Notifications {
 
     async listNotification(req: Request, res: Response) {
         const notification = await prisma.notification.findMany({
-            where: { OR: [{ assignedTo: req.user!.userId }, { assignedTo: null }] },
+            where: { OR: [{ assignedToId: req.user!.userId }, { assignedToId: null }] },
             orderBy: { createdAt: "desc" },
             include: { client: true },
             take: 100

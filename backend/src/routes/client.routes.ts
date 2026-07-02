@@ -7,7 +7,7 @@ const client = new Client
 
 clientRoutes.get("/getAllClients", requireAuth, client.listClients)
 clientRoutes.post("/create-client", requireAuth, client.createClient)
-clientRoutes.get("/client/:id", requireAuth, client.getParticularClient)
+clientRoutes.get("/getClientById/:id", requireAuth, client.getParticularClient)
 
 
 

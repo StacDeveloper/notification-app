@@ -37,7 +37,11 @@ export class Client {
     }
 
     async getParticularClient(req: Request, res: Response) {
+        console.log("req.received")
         const { id } = req.params as { id: string }
+        if (!id) {
+            return res.status(404).json({ success: false, message: "Id not received" })
+        }
         try {
             const partiCularclient = await prisma.client.findUnique({
                 where: { id },

@@ -22,8 +22,7 @@ const LoginPage = () => {
     setError(null)
     setStatus("submitting")
     try {
-      const submit = await login(form.email, form.password)
-      console.log("submit resposne" + submit)
+       await login(form.email, form.password)
       router.push("/")
     } catch (err) {
       setStatus("error")

@@ -7,6 +7,7 @@ import axios from "axios"
 import { API_URL } from "@/context/AuthContext"
 import toast from "react-hot-toast"
 import { usePolling } from "@/hooks/polling"
+import api from "@/lib/axios"
 
 const Cards: { key: keyof DashboardSummary, label: string, color: string, bg: string }[] = [
     { key: "sentToday", label: "Emails sent today", color: "var(--accent)", bg: "var(--accent-soft)" },
@@ -23,7 +24,7 @@ const DashboardPage = () => {
     const loadSummary = async () => {
         setLoading(true)
         try {
-            const { data } = await axios.get(`${API_URL}/email/list-all-emails`)
+            const { data } = await api.get("/email/list-all-emails")
             if (data.success) {
                 setSummary(data.data)
             }

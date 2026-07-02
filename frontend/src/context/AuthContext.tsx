@@ -2,7 +2,6 @@
 import { createContext, useContext, useCallback, useState, type ReactNode, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import type { User } from "../types/types"
-
 import toast from "react-hot-toast"
 import api from "@/lib/axios"
 
@@ -31,7 +30,7 @@ export const useAuthContext = () => {
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
     const [user, setUser] = useState<User | null>(null)
-    const [loading, setLoading] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(true)
     const router = useRouter()
 
 
@@ -54,13 +53,10 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
 
     const login = useCallback(async (email: string, password: string) => {
-        console.log("API URL:", process.env.NEXT_PUBLIC_BACKEND_URL)
-        console.log("req.received")
+
         try {
-            const submit = await api.post("/auth/login", { email, password })
-            console.log(submit)
-            const after = await me()
-            console.log(after)
+            await api.post("/auth/login", { email, password })
+            await me()
 
         } catch (error: any) {
             console.log(error)

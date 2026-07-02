@@ -23,7 +23,7 @@ export interface EmailLog{
     clientName:string 
     subject:string 
     body:string 
-    status:string 
+    status:string
     createdAt:string 
     updatedAt:string 
 }
