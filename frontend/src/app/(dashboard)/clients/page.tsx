@@ -19,6 +19,7 @@ const ClientPage = () => {
     try {
       setLoading(true)
       const { data } = await api.get("/client/getAllClients")
+      console.log(data)
       setClients(data.data)
       console.log(data)
     } catch (error:any) {
@@ -33,7 +34,7 @@ const ClientPage = () => {
   }
 
   useEffect(() => {
-    getAllClients
+    getAllClients()
   }, [])
 
 

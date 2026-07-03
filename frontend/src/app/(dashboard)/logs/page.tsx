@@ -1,7 +1,7 @@
 "use client"
 
 import api from '@/lib/axios'
-import { EmailLog, EmailStatus } from '@/types/types'
+import { Client, EmailLog, EmailStatus } from '@/types/types'
 import toast from 'react-hot-toast'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -9,25 +9,24 @@ import { usePolling } from '@/hooks/polling'
 import StatusBadge from '@/components/StatusBadge'
 
 
-interface LogsUpdateResponse {
-  logs: EmailLog[]
-  serverTime: string
+interface Log extends EmailLog{
+  client:Client
 }
+
 
 const STATUS_FILTERS: ("ALL" | EmailStatus)[] = ["ALL", 'BOUNCED', 'DELIVERED', 'FAILED', 'PENDING', 'SENT']
 
 const logsPage = () => {
-  const [logs, setLogs] = useState<EmailLog[]>([])
+  const [logs, setLogs] = useState<Log[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<"ALL" | EmailStatus>("ALL")
-  const [shouldPoll, setShouldPoll] = useState(true);
   const sinceRef = useRef<string>(new Date().toISOString())
 
   const getEmailLogs = useCallback(async () => {
     try {
       const data = await api.get("/email/logs/updates")
       setLogs(data.data.data)
-
+      sinceRef.current = data.data.data.serverTime
     } catch (error: any) {
       const message = error?.response?.data?.message || "Failed to get logs"
       console.log(error)
@@ -42,32 +41,7 @@ const logsPage = () => {
     getEmailLogs()
   }, [])
 
-  const pollingFucn = async () => {
-    try {
-      const data = await api.get(`/email/logs/updates?since=${encodeURIComponent(sinceRef.current)}`)
-      if (data.data.data.length > 0) {
-        const serverTime = data.data.data.serverTime
-        setLogs((log) => {
-          const map = new Map(log.map((l) => [l.id, l]))
-          for (const log of data.data.data.logs) map.set(log.id, log)
-          return Array.from(map.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        })
 
-      }
-    } catch (error: any) {
-      const status = error.response?.status;
-      if (status >= 400) {
-        setShouldPoll(false); // Stop polling
-      }
-      console.log(error)
-      
-    }
-  }
- usePolling(() => {
-  if (shouldPoll) {
-    pollingFucn();
-  }
-}, 4000);
   const filteredLogs = filter === "ALL" ? logs : logs.filter((log) => log.status === filter)
 
   return (
@@ -118,7 +92,7 @@ const logsPage = () => {
             ) : (
               filteredLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-black/[0.02]">
-                  <td className="px-5 py-3 font-medium">{log.clientName}</td>
+                  <td className="px-5 py-3 font-medium">{log.client.name}</td>
                   <td className="px-5 py-3" style={{ color: "var(--muted)" }}>{log.subject}</td>
                   <td className="px-5 py-3"><StatusBadge status={log.status as EmailStatus} /></td>
                   <td className="px-5 py-3" style={{ color: "var(--muted)" }}>

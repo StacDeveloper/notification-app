@@ -26,6 +26,11 @@ export class Client {
             return res.status(400).json({ error: parsed.error.flatten() })
         }
         try {
+            const senderEmail = parsed.data.email! as string
+            const existing = await prisma.client.findUnique({ where: { email: senderEmail } })
+            if (existing) {
+                return res.status(400).json({ success: false, message: "Client already exist" })
+            }
             const client = await prisma.client.create({
                 data: parsed.data
             })

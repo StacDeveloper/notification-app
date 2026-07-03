@@ -10,7 +10,7 @@ const sendEmailSchema = z.object({
 })
 
 export class Email {
-    async sendClientEmail(req: Request, res: Response) {
+    async   sendClientEmail(req: Request, res: Response) {
         const parsed = sendEmailSchema.safeParse(req.body)
         if (!parsed.success) {
             return res.status(400).json({ success: false, message: parsed.error.flatten() })

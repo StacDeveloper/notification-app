@@ -39,13 +39,15 @@ const SendEmailPage = () => {
   const selectedClient = clients.find((cli) => cli.id === clientId)
 
   async function handleSubmit(e: React.FormEvent) {
-    if (form.body.length < 0 || form.subject.length < 0) return
+    if (form.body.length < 0 || form.subject.length < 0){
+      return console.log("Form length is less than 0")
+    }
     if (!clientId) {
       setResult({ type: "error", message: "Choose a client before sending." })
     }
     e.preventDefault()
     try {
-      await api.post("/email/send-email", { clientId, form })
+      await api.post("/email/send-email", { clientId, ...form })
       setForm({ subject: "", body: "" })
     } catch (error: any) {
       const message = error?.response?.data?.message || "failed to send mail"
@@ -86,7 +88,7 @@ const SendEmailPage = () => {
           <input
             type="text"
             placeholder="Search clients by name, company, or email…"
-            value={selectedClient ? `${selectedClient.name} — ${selectedClient.company}` : search}
+            value={selectedClient ? selectedClient.email : search}
             onChange={(e) => {
               setSearch(e.target.value);
               setClientId("");
@@ -151,7 +153,7 @@ const SendEmailPage = () => {
         <button
           type="submit"
           disabled={submit}
-          className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          className="rounded-lg px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60 hover:cursor-pointer"
           style={{ background: "var(--accent)" }}
         >
           {submit ? "Sending…" : "Send email"}

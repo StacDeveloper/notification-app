@@ -3,10 +3,7 @@ import { useEffect, useState } from "react"
 import { timeAgo } from "../../lib/date"
 import type { DashboardSummary } from "../../types/types"
 import { useNotificationContext } from "@/context/NotificationContext"
-import axios from "axios"
-import { API_URL } from "@/context/AuthContext"
 import toast from "react-hot-toast"
-import { usePolling } from "@/hooks/polling"
 import api from "@/lib/axios"
 
 const Cards: { key: keyof DashboardSummary, label: string, color: string, bg: string }[] = [
@@ -25,6 +22,7 @@ const DashboardPage = () => {
         setLoading(true)
         try {
             const { data } = await api.get("/email/list-all-emails")
+            console.log(data)
             if (data.success) {
                 setSummary(data.data)
             }
@@ -40,7 +38,7 @@ const DashboardPage = () => {
         loadSummary()
     }, [])
 
-    usePolling(loadSummary, 4000)
+    // usePolling(loadSummary, 4000)
 
     return (
         <div className="space-y-6">

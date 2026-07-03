@@ -16,7 +16,7 @@ export interface SendEmailResult {
 export async function sendEmail({ to, subject, body }: SendEmailParams) {
     try {
         const result = await resend.emails.send({
-            from: "mulesoham7@gmail.com",
+            from: "Your App <onboarding@resend.dev>",
             to,
             subject,
             html: `<div>${body}</div>`

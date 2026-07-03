@@ -58,23 +58,23 @@ export const NotificationProvier = ({ children }: { children: ReactNode }) => {
         getNotification()
     }, [user])
 
-    usePolling(async () => {
-        if (!user) return
-        try {
-            const { data } = await api.get("notification/get-updates")
-            sinceRef.current = data.serverTime
-            if (data.data.length > 0) {
-                setNotification((prev) => {
-                    const exitingIds = new Set(prev.map(n => n.id))
-                    const fresh = data.notification.filter((n: any) => n.id !== exitingIds)
-                    return [...fresh, ...prev]
-                })
-            }
-        } catch (error: any) {
-            console.log(error)
-            toast.error(error)
-        }
-    })
+    // usePolling(async () => {
+    //     if (!user) return
+    //     try {
+    //         const { data } = await api.get("/notification/get-updates")
+    //         sinceRef.current = data.serverTime
+    //         if (data.data.length > 0) {
+    //             setNotification((prev) => {
+    //                 const exitingIds = new Set(prev.map(n => n.id))
+    //                 const fresh = data.notification.filter((n: any) => n.id !== exitingIds)
+    //                 return [...fresh, ...prev]
+    //             })
+    //         }
+    //     } catch (error: any) {
+    //         console.log(error)
+    //         toast.error(error)
+    //     }
+    // })
 
     const markAsRead = useCallback(async (id: string) => {
         setNotification((prev) => prev.map((not) => not.id === id ? { ...not, read: false } : not))
