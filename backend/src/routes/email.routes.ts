@@ -8,6 +8,6 @@ const email = new Email()
 
 emailRoutes.post("/send-email", requireAuth, email.sendClientEmail)
 emailRoutes.get("/list-all-emails", requireAuth, email.listEmailLogs)
-emailRoutes.post("/logs/updates", requireAuth, email.getEmailLogUpdates)
+emailRoutes.get("/logs/updates", requireAuth, email.getEmailLogUpdates)
 
 export default emailRoutes

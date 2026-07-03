@@ -20,8 +20,8 @@ export default function AddClientModal({
     setSubmitting(true);
     setError(null);
     try {
-      const client = await api.post("/api/clients", { name, email, company });
-      onCreated(client as Client | any );
+      const client = await api.post("/client/create-client", { name, email, company });
+      onCreated(client.data.data as Client | any );
     } catch (err) {
       setError("Couldn't add client.");
     } finally {

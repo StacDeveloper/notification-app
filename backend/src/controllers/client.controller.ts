@@ -29,6 +29,7 @@ export class Client {
             const client = await prisma.client.create({
                 data: parsed.data
             })
+            return res.status(200).json({ success: true, data: client })
         } catch (error: any) {
             console.log(error)
             return res.status(500).json({ success: false, message: error.message })

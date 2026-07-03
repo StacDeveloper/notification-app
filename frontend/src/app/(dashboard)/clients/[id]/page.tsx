@@ -10,7 +10,7 @@ import Link from 'next/link'
 import StatusBadge from '@/components/StatusBadge'
 
 interface ClientDetail extends Client {
-  emails: EmailLog[]
+  emailLogs: EmailLog[]
 }
 
 const ClientIdPage = () => {
@@ -24,6 +24,7 @@ const ClientIdPage = () => {
     try {
       setLoading(true)
       const { data } = await api.get(`/client/getClientById/${id}`)
+      console.log(data)
       setClient(data.data)
     } catch (error: any) {
       const message = error?.response?.data?.message || "Failed to load client"
@@ -39,6 +40,8 @@ const ClientIdPage = () => {
   useEffect(() => {
     getClientInfo()
   }, [getClientInfo])
+
+  const detail = client as ClientDetail
 
   if (loading) {
     return <p className="text-sm" style={{ color: "var(--muted)" }}>Loading client…</p>;
@@ -83,7 +86,7 @@ const ClientIdPage = () => {
           className="rounded-xl border overflow-hidden"
           style={{ background: "var(--surface)", borderColor: "var(--border)" }}
         >
-          {client.emails.length === 0 ? (
+          {detail.emailLogs.length === 0 ? (
             <p className="px-5 py-8 text-center text-sm" style={{ color: "var(--muted)" }}>
               No emails sent to this client yet.
             </p>
@@ -97,7 +100,7 @@ const ClientIdPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y" style={{ borderColor: "var(--border)" }}>
-                {client.emails.map((email) => (
+                {client.emailLogs.map((email) => (
                   <tr key={email.id}>
                     <td className="px-5 py-3 font-medium">{email.subject}</td>
                     <td className="px-5 py-3"><StatusBadge status={email.status as EmailStatus} /></td>
