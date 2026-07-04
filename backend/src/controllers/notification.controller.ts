@@ -1,6 +1,7 @@
 import type { Request, Response } from "express"
 import { flattenError, success, z } from "zod"
 import { prisma } from "../lib/prisma"
+import { sseManager } from "../lib/sse"
 
 const createNotificationSchema = z.object({
     type: z.enum(["MISSING_DOCUMENTS, EMAIL_FAILED, EMAIL_BOUNCED, GENERAL"]),
@@ -15,8 +16,9 @@ export class Notifications {
         if (!parsed.success) {
             return res.status(400).json({ success: false, message: parsed.error.flatten() || "Invalid Data" })
         }
-        const data = parsed.data as any 
+        const data = parsed.data as any
         const notification = await prisma.notification.create({ data: data })
+        await sseManager.broadCastToUser("notification:new", notification)
         return res.status(200).json({ success: true, data: notification })
     }
 

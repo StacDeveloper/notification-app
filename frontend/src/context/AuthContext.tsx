@@ -82,7 +82,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         me()
-    }, [me])
+    }, [])
 
 
     const value: any = {

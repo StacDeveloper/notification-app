@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Webhook } from "svix"
 import { prisma } from "../lib/prisma"
 import dotenv from "dotenv"
+import { sseManager } from "../lib/sse";
 dotenv.config()
 
 export const handleResendWebHook = async (req: Request, res: Response) => {
@@ -43,9 +44,7 @@ export const handleResendWebHook = async (req: Request, res: Response) => {
     if (status) {
         await prisma.emailLog.update({
             where: { id: log.id },
-            data: {
-                status
-            }
+            data: { status }
         })
         if (status === "BOUNCED") {
             await prisma.notification.create({
@@ -55,7 +54,9 @@ export const handleResendWebHook = async (req: Request, res: Response) => {
                     clientId: log.clientId
                 }
             })
+            await sseManager.broadCastToUser("email:update", { id: log.id, status })
         }
+        await sseManager.broadCastToUser("email:update", { id: log.id, status })
     }
     return res.status(200).json({ success: true, received: true })
 }

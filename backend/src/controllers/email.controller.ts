@@ -2,6 +2,7 @@ import { Request, Response } from "express"
 import { z } from "zod"
 import { prisma } from "../../src/lib/prisma"
 import { sendEmail } from "../lib/resend"
+import { sseManager } from "../lib/sse"
 
 const sendEmailSchema = z.object({
     clientId: z.string().min(1),
@@ -10,7 +11,7 @@ const sendEmailSchema = z.object({
 })
 
 export class Email {
-    async   sendClientEmail(req: Request, res: Response) {
+    async sendClientEmail(req: Request, res: Response) {
         const parsed = sendEmailSchema.safeParse(req.body)
         if (!parsed.success) {
             return res.status(400).json({ success: false, message: parsed.error.flatten() })
@@ -36,6 +37,7 @@ export class Email {
             where: { id: log.id },
             data: result.error ? { status: "FAILED", errorMessage: result.error } : { status: "SENT", resendId: result.resendId }
         })
+        await sseManager.sendToUser(req.user!.userId, "email:update", updated)
         if (result.error) {
             await prisma.notification.create({
                 data: {

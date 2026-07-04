@@ -11,8 +11,9 @@ const api = axios.create({
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
-            // clear user and redirect to login
+        const is401 = error?.resposne?.status === 401
+        const isAuthCheck = error?.config?.url?.includes("/auth/findMe")
+        if (is401 && !isAuthCheck) {
             window.location.href = "/login"
         }
         return Promise.reject(error)

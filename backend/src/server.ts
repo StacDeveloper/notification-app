@@ -8,6 +8,7 @@ import notificationRoutes from "./routes/notification.routes"
 import webHookRoutes from "./routes/webhook.routes"
 import cookieParser from "cookie-parser"
 import cors from "cors"
+import sseRoutes from "./routes/sse.routes"
 dotenv.config()
 
 const app = express()
@@ -22,6 +23,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api/client", clientRoutes)
 app.use("/api/email", emailRoutes)
 app.use("/api/notification", notificationRoutes)
+app.use("/api/sse", sseRoutes)
 app.use("/api/webhook", webHookRoutes)
 app.use("/health", (req, res) => res.json({ success: true, message: "Server is healthly" }))
 
