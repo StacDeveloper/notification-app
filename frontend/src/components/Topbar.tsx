@@ -1,5 +1,5 @@
 import { useAuthContext } from '@/context/AuthContext'
-import React from 'react'
+
 import NotificationBell from './NotificationBell'
 
 const PAGETitles: Record<string, string> = {
