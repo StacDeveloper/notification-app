@@ -3,9 +3,8 @@
 import api from '@/lib/axios'
 import { Client, EmailLog, EmailStatus } from '@/types/types'
 import toast from 'react-hot-toast'
+import  { useCallback, useEffect, useRef, useState } from 'react'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { usePolling } from '@/hooks/polling'
 import StatusBadge from '@/components/StatusBadge'
 
 

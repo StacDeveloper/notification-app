@@ -3,8 +3,6 @@ import { useCallback, useEffect, useState } from "react"
 import api from "@/lib/axios"
 import toast from "react-hot-toast"
 import { timeAgo } from "@/lib/date"
-import StatusBadge from "@/components/StatusBadge"
-import type { EmailStatus } from "@/types/types"
 
 type NotificationType = "MISSING_DOCUMENTS" | "EMAIL_FAILED" | "EMAIL_BOUNCED" | "GENERAL"
 
