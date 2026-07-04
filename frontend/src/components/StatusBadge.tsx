@@ -1,4 +1,3 @@
-import React from 'react'
 import type { EmailStatus } from '../types/types'
 
 const Styles: Record<string, { bg: string, fg: string, label: string }> = {

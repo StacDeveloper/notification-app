@@ -2,9 +2,7 @@ import { useNotificationContext } from '@/context/NotificationContext'
 import { useEffect, useRef, useState } from 'react'
 import BellIcon from './Bellicon'
 import { timeAgo } from "../lib/date"
-
-
-
+import Link from 'next/link'
 
 const NotificationBell = () => {
 
@@ -17,7 +15,8 @@ const NotificationBell = () => {
             if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
         }
         document.addEventListener("mousedown", onClick)
-    })
+        return ()=>document.removeEventListener("mousedown", onClick)
+    },[])
 
     return (
         <div className="relative" ref={ref}>
@@ -74,7 +73,17 @@ const NotificationBell = () => {
                                 </button>
                             ))
                         )}
+                        <div className='px-4 py-3 border-t' style={{borderColor:"var(--border)"}}>
+                        <Link 
+                        href="/notifications" 
+                        className='block w-full text-center text-sm font-medium py-2 rounded-lg transition-colors'
+                        onClick={()=>setOpen(false)}
+                        >
+                            Create Notificaion
+                        </Link>
+                        </div>
                     </div>
+                    
                 </div>
             )}
         </div>

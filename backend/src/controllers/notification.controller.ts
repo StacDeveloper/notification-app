@@ -4,10 +4,10 @@ import { prisma } from "../lib/prisma"
 import { sseManager } from "../lib/sse"
 
 const createNotificationSchema = z.object({
-    type: z.enum(["MISSING_DOCUMENTS, EMAIL_FAILED, EMAIL_BOUNCED, GENERAL"]),
+    type: z.enum(["MISSING_DOCUMENTS", "EMAIL_FAILED", "EMAIL_BOUNCED", "GENERAL"]),
     message: z.string().min(1),
     clientId: z.string().optional(),
-    assignedTold: z.string().optional()
+    assignedToId: z.string().optional()
 })
 
 export class Notifications {

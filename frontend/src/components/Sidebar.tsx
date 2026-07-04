@@ -1,7 +1,8 @@
 import { useAuthContext } from '@/context/AuthContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react'
+import { useRouter } from 'next/navigation';
+
 
 
 const NavLink = [
@@ -9,6 +10,7 @@ const NavLink = [
   { href: "/clients", label: "Clients", icon: UsersIcon },
   { href: "/send-email", label: "Send Email", icon: SendIcon },
   { href: "/logs", label: "Logs", icon: ListIcon },
+  { href: "/notifications", label: "Notifications", icon: ListIcon },
 
 ]
 
@@ -16,6 +18,7 @@ const Sidebar = () => {
 
   const pathname = usePathname()
   const { user } = useAuthContext()
+  const router = useRouter()
 
   return (
     <aside
@@ -29,7 +32,7 @@ const Sidebar = () => {
         >
           N
         </div>
-        <span className="font-semibold text-[15px]">Notify Admin</span>
+        <span className="font-semibold text-[15px] hover:cursor-pointer" onClick={()=>router.push("/")} >Notify Admin</span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">

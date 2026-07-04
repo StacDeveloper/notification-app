@@ -18,7 +18,6 @@ export function useSSE() {
                     console.log(data)
                 } catch (error: any) {
                     console.log(error)
-
                 }
             }
             loadSummary().then(() => console.log(`SSE works fine!`)).catch((err) => console.log(err))
