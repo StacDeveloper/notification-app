@@ -68,15 +68,15 @@ model EmailLog {
 }
 
 model Notification {
-    id           String           @id @default(cuid())
-    type         NotificationType @default(GENERAL)
-    message      String
-    isRead       Boolean          @default(false)
-    client       Client?          @relation(fields: [clientId], references: [id])
-    clientId     String?
-    assignedTo   User?            @relation("AssignedTo", fields: [assignedToId], references: [id])
-    assignedToId String?
-    createdAt    DateTime         @default(now())
-
-    @@index([isRead])
+  id           String           @id @default(cuid())
+  type         NotificationType @default(GENERAL)
+  message      String
+  isRead       Boolean          @default(false)
+  scheduledAt  DateTime?        
+  reminderSent Boolean          @default(false)
+  client       Client?          @relation(fields: [clientId], references: [id])
+  clientId     String?
+  assignedTo   User?            @relation("AssignedTo", fields: [assignedToId], references: [id])
+  assignedToId String?
+  createdAt    DateTime         @default(now())
 }

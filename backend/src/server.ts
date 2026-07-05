@@ -9,6 +9,7 @@ import webHookRoutes from "./routes/webhook.routes"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 import sseRoutes from "./routes/sse.routes"
+import { startSchedular } from "./lib/schedular.js"
 dotenv.config()
 
 const app = express()
@@ -29,4 +30,5 @@ app.use("/health", (req, res) => res.json({ success: true, message: "Server is h
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`)
+    startSchedular()
 })
