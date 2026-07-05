@@ -1,6 +1,6 @@
 import { useAuthContext } from '@/context/AuthContext'
-
 import NotificationBell from './NotificationBell'
+import { useSidebarContext } from '@/context/SidebarContext'
 
 const PAGETitles: Record<string, string> = {
   "/": "Dashboard",
@@ -10,20 +10,29 @@ const PAGETitles: Record<string, string> = {
   "/users": "User Management",
 }
 
-
 const Topbar = ({ pathname }: { pathname: string }) => {
 
   const { user, logout } = useAuthContext()
-
-  const title = PAGETitles[pathname] ?? (pathname.startsWith("/clients")) ? "Client Details" : "Notify Admin"
-
+  const { toggle } = useSidebarContext()
+  const title = PAGETitles[pathname] ?? (pathname.startsWith("/clients") ? "Client Details" : "Notify Admin")
 
   return (
     <header
       className="flex items-center justify-between h-16 px-4 md:px-6 border-b shrink-0"
       style={{ borderColor: "var(--border)", background: "var(--surface)" }}
     >
-      <h1 className="text-base font-semibold">{title}</h1>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label="Toggle menu"
+          className="md:hidden p-2 -ml-2 rounded-lg"
+          style={{ color: "var(--muted)" }}
+        >
+          <HamburgerIcon />
+        </button>
+        <h1 className="text-base font-semibold">{title}</h1>
+      </div>
 
       <div className="flex items-center gap-4">
         <NotificationBell />
@@ -56,3 +65,11 @@ const Topbar = ({ pathname }: { pathname: string }) => {
 }
 
 export default Topbar
+
+function HamburgerIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" />
+    </svg>
+  );
+}

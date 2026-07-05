@@ -6,9 +6,10 @@ import { useAuthContext } from "@/context/AuthContext"
 import { NotificationProvier } from "@/context/NotificationContext"
 import Sidebar from "./Sidebar"
 import Topbar from "./Topbar"
+import { SidebarProvider } from "@/context/SidebarContext"
 
 
-const DashBoardShell = ({ children }: { children: ReactNode })=> {
+const DashBoardShell = ({ children }: { children: ReactNode }) => {
     const { user, loading } = useAuthContext()
     const router = useRouter()
     const pathname = usePathname()
@@ -34,13 +35,15 @@ const DashBoardShell = ({ children }: { children: ReactNode })=> {
 
     return (
         <NotificationProvier>
-            <div className="flex h-screen" style={{ background: "var(--background)" }}>
-                <Sidebar />
-                <div className="flex-1 flex flex-col min-w-0">
-                    <Topbar pathname={pathname} />
-                    <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+            <SidebarProvider>
+                <div className="flex h-screen" style={{ background: "var(--background)" }}>
+                    <Sidebar />
+                    <div className="flex-1 flex flex-col min-w-0">
+                        <Topbar pathname={pathname} />
+                        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+                    </div>
                 </div>
-            </div>
+            </SidebarProvider>
         </NotificationProvier>
     )
 }

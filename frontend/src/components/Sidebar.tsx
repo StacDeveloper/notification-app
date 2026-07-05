@@ -1,9 +1,7 @@
 import { useAuthContext } from '@/context/AuthContext';
+import { useSidebarContext } from '@/context/SidebarContext';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-
-
+import { usePathname, useRouter } from 'next/navigation';
 
 const NavLink = [
   { href: "/", label: "Dashboard", icon: GridIcon },
@@ -11,20 +9,16 @@ const NavLink = [
   { href: "/send-email", label: "Send Email", icon: SendIcon },
   { href: "/logs", label: "Logs", icon: ListIcon },
   { href: "/notifications", label: "Notifications", icon: ListIcon },
-
 ]
 
 const Sidebar = () => {
-
   const pathname = usePathname()
   const { user } = useAuthContext()
   const router = useRouter()
+  const { open, close } = useSidebarContext()
 
-  return (
-    <aside
-      className="hidden md:flex md:w-60 md:flex-col shrink-0 border-r"
-      style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-    >
+  const navContent = (
+    <>
       <div className="flex items-center gap-2 px-5 h-16 border-b" style={{ borderColor: "var(--border)" }}>
         <div
           className="h-8 w-8 rounded-lg flex items-center justify-center text-white font-semibold"
@@ -32,7 +26,12 @@ const Sidebar = () => {
         >
           N
         </div>
-        <span className="font-semibold text-[15px] hover:cursor-pointer" onClick={()=>router.push("/")} >Notify Admin</span>
+        <span
+          className="font-semibold text-[15px] hover:cursor-pointer"
+          onClick={() => { router.push("/"); close(); }}
+        >
+          Notify Admin
+        </span>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
@@ -43,6 +42,7 @@ const Sidebar = () => {
             <Link
               key={item.href}
               href={item.href}
+              onClick={close}
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
               style={
                 active
@@ -59,6 +59,7 @@ const Sidebar = () => {
         {user?.role === "ADMIN" && (
           <Link
             href="/users"
+            onClick={close}
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
             style={
               pathname === "/users"
@@ -75,7 +76,37 @@ const Sidebar = () => {
       <div className="px-5 py-4 text-xs" style={{ color: "var(--muted)" }}>
         Internal email notifications
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Overlay (mobile only, shown when open) */}
+      {open && (
+        <div
+          onClick={close}
+          className="md:hidden fixed inset-0 z-40 transition-opacity"
+          style={{ background: "rgba(0,0,0,0.4)" }}
+        />
+      )}
+
+      {/* Mobile slide-in drawer */}
+      <aside
+        className={`md:hidden fixed top-0 left-0 h-full w-64 z-50 flex flex-col border-r transform transition-transform duration-300 ease-in-out ${open ? "translate-x-0" : "-translate-x-full"
+          }`}
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
+        {navContent}
+      </aside>
+
+      {/* Desktop sidebar (unchanged) */}
+      <aside
+        className="hidden md:flex md:w-60 md:flex-col shrink-0 border-r"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
+        {navContent}
+      </aside>
+    </>
   );
 }
 
