@@ -1,6 +1,8 @@
 import { Inngest } from "inngest"
 import { Resend } from "resend"
 import { prisma } from "./prisma"
+import dotenv from "dotenv"
+dotenv.config()
 
 export const inngest = new Inngest({ id: "notification-app" })
 
