@@ -18,13 +18,22 @@ export class Notifications {
         if (!parsed.success) {
             return res.status(400).json({ success: false, message: parsed.error.flatten() || "Invalid Data" })
         }
-        const data = parsed.data as any
-        const notification = await prisma.notification.create({ data: data })
-        await inngest.send({
-            name: "notification/reminder",
-            data: { notificationId: notification.id },
-            ts: new Date(parsed.data.scheduledAt!).getTime()
+        const notification = await prisma.notification.create({
+            data: {
+                type: parsed.data.type,
+                message: parsed.data.message,
+                ...(parsed.data.clientId && { clientId: parsed.data.clientId }),
+                assignedToId: parsed.data.assignedToId || req.user!.userId,
+                ...(parsed.data.scheduledAt && { scheduledAt: new Date(parsed.data.scheduledAt) })
+            }
         })
+        if (parsed.data.scheduledAt) {
+            await inngest.send({
+                name: "notification/reminder",
+                data: { notificationId: notification.id },
+                ts: new Date(parsed.data.scheduledAt!).getTime()
+            })
+        }
         return res.status(200).json({ success: true, data: notification })
     }
 
