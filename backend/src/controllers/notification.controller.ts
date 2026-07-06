@@ -9,7 +9,7 @@ const createNotificationSchema = z.object({
     message: z.string().min(1),
     clientId: z.string().optional(),
     assignedToId: z.string().optional(),
-    scheduledAt: z.date()
+    scheduledAt: z.string().datetime().optional()
 })
 
 export class Notifications {
@@ -23,7 +23,7 @@ export class Notifications {
         await inngest.send({
             name: "notification/reminder",
             data: { notificationId: notification.id },
-            ts: new Date(parsed.data.scheduledAt).getTime()
+            ts: new Date(parsed.data.scheduledAt!).getTime()
         })
         return res.status(200).json({ success: true, data: notification })
     }
