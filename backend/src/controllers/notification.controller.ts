@@ -1,13 +1,15 @@
 import type { Request, Response } from "express"
-import { flattenError, success, z } from "zod"
+import { z } from "zod"
 import { prisma } from "../lib/prisma"
 import { sseManager } from "../lib/sse"
+import { inngest } from "../lib/inngest"
 
 const createNotificationSchema = z.object({
     type: z.enum(["MISSING_DOCUMENTS", "EMAIL_FAILED", "EMAIL_BOUNCED", "GENERAL"]),
     message: z.string().min(1),
     clientId: z.string().optional(),
-    assignedToId: z.string().optional()
+    assignedToId: z.string().optional(),
+    scheduledAt: z.date()
 })
 
 export class Notifications {
@@ -18,6 +20,11 @@ export class Notifications {
         }
         const data = parsed.data as any
         const notification = await prisma.notification.create({ data: data })
+        await inngest.send({
+            name: "notification/reminder",
+            data: { notificationId: notification.id },
+            ts: new Date(parsed.data.scheduledAt).getTime()
+        })
         await sseManager.broadCastToUser("notification:new", notification)
         return res.status(200).json({ success: true, data: notification })
     }
