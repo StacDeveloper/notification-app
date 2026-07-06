@@ -4,7 +4,7 @@ import { inngest, sendReminderEmail } from "../lib/inngest"
 
 const inngestRoutes = express.Router()
 
-inngestRoutes.get("/notification", serve({ client: inngest, functions: [sendReminderEmail] }))
+inngestRoutes.use("/notification", serve({ client: inngest, functions: [sendReminderEmail] }))
 
 
 export default inngestRoutes
