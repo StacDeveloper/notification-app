@@ -8,8 +8,6 @@ import notificationRoutes from "./routes/notification.routes"
 import webHookRoutes from "./routes/webhook.routes"
 import cookieParser from "cookie-parser"
 import cors from "cors"
-import sseRoutes from "./routes/sse.routes"
-import { startSchedular } from "../src/lib/schedular"
 import inngestRoutes from "./routes/inngest.routes"
 dotenv.config()
 
@@ -26,11 +24,9 @@ app.use("/api/client", clientRoutes)
 app.use("/api/email", emailRoutes)
 app.use("/api/notification", notificationRoutes)
 app.use("/api/inngest", inngestRoutes)
-app.use("/api/sse", sseRoutes)
 app.use("/api/webhook", webHookRoutes)
 app.use("/health", (req, res) => res.json({ success: true, message: "Server is healthly" }))
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`)
-    startSchedular()
 })

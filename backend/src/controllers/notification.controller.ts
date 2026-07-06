@@ -1,7 +1,7 @@
 import type { Request, Response } from "express"
 import { z } from "zod"
 import { prisma } from "../lib/prisma"
-import { sseManager } from "../lib/sse"
+
 import { inngest } from "../lib/inngest"
 
 const createNotificationSchema = z.object({
@@ -25,7 +25,6 @@ export class Notifications {
             data: { notificationId: notification.id },
             ts: new Date(parsed.data.scheduledAt).getTime()
         })
-        await sseManager.broadCastToUser("notification:new", notification)
         return res.status(200).json({ success: true, data: notification })
     }
 
