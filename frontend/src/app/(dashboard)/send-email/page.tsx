@@ -6,6 +6,57 @@ import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
+const EMAIL_TEMPLATES = {
+  general: {
+    subject: "General Update",
+    body: `Dear Client,
+
+I hope you are doing well.
+
+We wanted to provide you with an update regarding your application. If you have any questions or require any assistance, please don't hesitate to contact us.
+
+Kind regards,
+Your Team`
+  },
+  missingDocuments: {
+    subject: "Missing Documents Required",
+    body: `Dear Client,
+
+We are currently reviewing your application and noticed that some required documents are still missing.
+
+Please send the outstanding documents at your earliest convenience so we can continue processing your application without delay.
+
+If you have any questions regarding the required documents, please let us know.
+
+Kind regards,
+Your Team`
+  },
+  emailFailed: {
+    subject: "Unable to Deliver Previous Email",
+    body: `Dear Client,
+
+We recently attempted to contact you, but it appears our previous email could not be delivered successfully.
+
+Please reply to this email or contact us to confirm your correct email address so we can resend the information.
+
+Kind regards,
+Your Team`
+  },
+  emailBounced: {
+    subject: "Email Address Requires Verification",
+    body: `Dear Client,
+
+Our recent email to your registered email address was returned as undeliverable.
+
+Please confirm your current email address so we can continue communicating important updates regarding your application.
+
+Thank you for your cooperation.
+
+Kind regards,
+Your Team`
+  }
+} as const
+
 const SendEmailPage = () => {
   const searchParams = useSearchParams()
   const [clients, setClients] = useState<Client[]>([])
@@ -14,6 +65,25 @@ const SendEmailPage = () => {
   const [form, setForm] = useState<{ subject: string, body: string }>({ subject: "", body: "" })
   const [submit, setSubmit] = useState<boolean>(false)
   const [result, setResult] = useState<{ type: string, message: string } | null>(null)
+  const [template, setTemplate] = useState<keyof typeof EMAIL_TEMPLATES>("general")
+
+
+  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as keyof typeof EMAIL_TEMPLATES | any
+    setTemplate(value)
+    if (value === "custom") {
+      setForm({
+        subject: "",
+        body: ""
+      })
+      return
+    }
+    const selected = EMAIL_TEMPLATES[value as keyof typeof EMAIL_TEMPLATES]
+    setForm({
+      subject: selected.subject,
+      body: selected.body
+    })
+  }
 
 
   const getClients = useCallback(async () => {
@@ -39,7 +109,7 @@ const SendEmailPage = () => {
   const selectedClient = clients.find((cli) => cli.id === clientId)
 
   async function handleSubmit(e: React.FormEvent) {
-    if (form.body.length < 0 || form.subject.length < 0){
+    if (form.body.length < 0 || form.subject.length < 0) {
       return console.log("Form length is less than 0")
     }
     if (!clientId) {
@@ -123,6 +193,23 @@ const SendEmailPage = () => {
               )}
             </div>
           )}
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium">Email Type</label>
+
+          <select
+            value={template}
+            onChange={handleTemplateChange}
+            className="w-full rounded-lg border px-3 py-2 text-sm"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <option value="general">General</option>
+            <option value="missingDocuments">Missing Documents</option>
+            <option value="emailFailed">Email Failed</option>
+            <option value="emailBounced">Email Bounced</option>
+            <option value="custom">Create Your Own</option>
+          </select>
         </div>
 
         <div className="space-y-1.5">

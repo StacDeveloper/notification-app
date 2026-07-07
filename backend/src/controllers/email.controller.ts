@@ -50,11 +50,15 @@ export class Email {
     }
 
     async listEmailLogs(req: Request, res: Response) {
-        const logs = await prisma.emailLog.findMany({
+        const take = parseInt(req.query.take as string) || 15
+        const skip = parseInt(req.query.skip as string) || 0
+        const [logs, total] = await Promise.all([prisma.emailLog.findMany({
             orderBy: { createdAt: "desc" },
-            include: { client: true, sentBy: { select: { id: true, name: true } } }
-        })
-        return res.status(200).json({ success: true, data: logs })
+            include: { client: true, sentBy: { select: { id: true, name: true } } },
+            take,
+            skip
+        }), prisma.emailLog.count()])
+        return res.status(200).json({ success: true, data: logs, total, skip, take })
     }
 
     async getEmailLogUpdates(req: Request, res: Response) {

@@ -15,8 +15,8 @@ const NotificationBell = () => {
             if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
         }
         document.addEventListener("mousedown", onClick)
-        return ()=>document.removeEventListener("mousedown", onClick)
-    },[])
+        return () => document.removeEventListener("mousedown", onClick)
+    }, [])
 
     return (
         <div className="relative" ref={ref}>
@@ -29,11 +29,19 @@ const NotificationBell = () => {
                 <BellIcon />
                 {unreadCount > 0 && (
                     <span
-                        className="absolute -top-0.5 -right-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white"
+                        className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white"
                         style={{ background: "var(--danger)" }}
                     >
                         {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
+                )}
+
+                {/* Small red dot */}
+                {unreadCount > 0 && (
+                    <span
+                        className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2"
+                        style={{ borderColor: "var(--surface)" }}
+                    />
                 )}
             </button>
 
@@ -73,17 +81,17 @@ const NotificationBell = () => {
                                 </button>
                             ))
                         )}
-                        <div className='px-4 py-3 border-t' style={{borderColor:"var(--border)"}}>
-                        <Link 
-                        href="/notifications" 
-                        className='block w-full text-center text-sm font-medium py-2 rounded-lg transition-colors'
-                        onClick={()=>setOpen(false)}
-                        >
-                            Create Notificaion
-                        </Link>
+                        <div className='px-4 py-3 border-t' style={{ borderColor: "var(--border)" }}>
+                            <Link
+                                href="/notifications"
+                                className='block w-full text-center text-sm font-medium py-2 rounded-lg transition-colors'
+                                onClick={() => setOpen(false)}
+                            >
+                                Create Notificaion
+                            </Link>
                         </div>
                     </div>
-                    
+
                 </div>
             )}
         </div>

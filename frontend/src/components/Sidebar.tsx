@@ -1,4 +1,5 @@
 import { useAuthContext } from '@/context/AuthContext';
+import { useNotificationContext } from '@/context/NotificationContext';
 import { useSidebarContext } from '@/context/SidebarContext';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -157,6 +158,8 @@ function ShieldIcon() {
 }
 
 function NotificationIcon() {
+  const { unreadCount } = useNotificationContext();
+
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg
@@ -175,7 +178,14 @@ function NotificationIcon() {
       </svg>
 
       {/* Notification badge */}
-      <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500"></span>
+      {unreadCount > 0 && (
+        <span
+          className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white"
+          style={{ background: "var(--danger)" }}
+        >
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
+      )}
     </div>
   );
 }

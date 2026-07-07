@@ -37,13 +37,18 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(false)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [skip, setSkip] = useState(0)
+  const [total, setTotal] = useState(0)
+  const [loadingMore, setLoadingMore] = useState(false)
 
-  const loadEmails = useCallback(async () => {
-    setLoading(true)
+  const loadEmails = useCallback(async (skipVal = 0, append = false) => {
+    skipVal === 0 ? setLoading(true) : setLoadingMore(true)
     try {
-      const { data } = await api.get("/email/list-all-emails")
-      if (data.success) setEmails(data.data)
-        console.log(data)
+      const { data } = await api.get(`/email/list-all-emails?take=${PAGE_SIZE}&skip=${skipVal}`)
+      if (data.success) setEmails((prev) => append ? [...prev, ...data.data] : data.data)
+      setTotal(data.total)
+      setSkip(skipVal)
+      console.log(data)
     } catch (error: any) {
       toast.error(error.message)
     } finally {
@@ -52,8 +57,10 @@ const DashboardPage = () => {
   }, [])
 
   useEffect(() => {
-    loadEmails()
+    loadEmails(0)
   }, [loadEmails])
+
+  const hasMore = skip + PAGE_SIZE < total
 
   // derive summary from data — no extra API call needed
   const today = new Date().toDateString()
@@ -64,7 +71,6 @@ const DashboardPage = () => {
   }
 
   const visible = emails.slice(0, visibleCount)
-  const hasMore = visibleCount < emails.length
 
   const toggle = (id: string) =>
     setExpandedId(prev => (prev === id ? null : id))
@@ -208,7 +214,7 @@ const DashboardPage = () => {
               className="w-full text-sm font-medium py-2 rounded-lg border transition-colors hover:bg-black/[0.03]"
               style={{ borderColor: "var(--border)", color: "var(--accent)" }}
             >
-              Load more ({emails.length - visibleCount} remaining)
+              {loadingMore ? "Loading…" : `Load more (${total - skip - PAGE_SIZE} remaining)`}
             </button>
           </div>
         )}
