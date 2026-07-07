@@ -21,7 +21,7 @@ export const sendReminderEmail = inngest.createFunction(
         if (!notification.assignedTo?.email) return
         const result = await resend.emails.send({
             from: "Your App <onboarding@resend.dev>",
-            to: "mulesoham7@gmail.com",
+            to: "sohammule9@gmail.com",
             subject: `Reminder: ${notification.type.replace(/_/g, " ")}`,
             html: `<div style="font-family:sans-serif;max-width:500px">
                     <h2>Notification Reminder</h2>
