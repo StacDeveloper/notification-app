@@ -19,9 +19,9 @@ export const sendReminderEmail = inngest.createFunction(
         })
         if (!notification || notification.reminderSent) return
         if (!notification.assignedTo?.email) return
-        await resend.emails.send({
+        const result = await resend.emails.send({
             from: "Your App <onboarding@resend.dev>",
-            to: notification.assignedTo.email,
+            to: "mulesoham7@gmail.com",
             subject: `Reminder: ${notification.type.replace(/_/g, " ")}`,
             html: `<div style="font-family:sans-serif;max-width:500px">
                     <h2>Notification Reminder</h2>
@@ -31,6 +31,7 @@ export const sendReminderEmail = inngest.createFunction(
                     : ""}
                 </div>`
         })
+        console.log(result)
         await prisma.notification.update({
             where: { id: notificationId },
             data: { reminderSent: true }
