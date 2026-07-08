@@ -2,8 +2,9 @@
 
 import api from '@/lib/axios'
 import { Client } from '@/types/types'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 
 const EMAIL_TEMPLATES = {
@@ -58,8 +59,8 @@ Your Team`
 } as const
 
 const SendEmailPage = () => {
+  const queryClient = useQueryClient()
   const searchParams = useSearchParams()
-  const [clients, setClients] = useState<Client[]>([])
   const [search, setSearch] = useState<string>("")
   const [clientId, setClientId] = useState(searchParams.get("clientId"))
   const [form, setForm] = useState<{ subject: string, body: string }>({ subject: "", body: "" })
@@ -85,19 +86,16 @@ const SendEmailPage = () => {
     })
   }
 
+  const { data: clientData, isLoading } = useQuery({
+    queryKey: ["clients"],
+    queryFn: async () => {
+      const { data } = await api.get("/clients/getAllClients")
+      return data.data as Client[]
+    },
+    staleTime: 5 * 60 * 1000
+  })
 
-  const getClients = useCallback(async () => {
-    try {
-      const { data } = await api.get("/client/getAllClients")
-      setClients(data.data)
-    } catch (error: any) {
-      const message = error?.response?.data?.message || "Failed to get data"
-      console.log(message)
-      toast.error(message)
-    }
-
-  }, [])
-
+  const clients = clientData ?? []
   const filterClients = useMemo(() => {
     if (!search.trim()) return clients
     const query = search.toLowerCase()
@@ -108,6 +106,23 @@ const SendEmailPage = () => {
 
   const selectedClient = clients.find((cli) => cli.id === clientId)
 
+
+  const { mutate: sendEmail, isPending } = useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post("/email/send-email", { clientId, ...form })
+      return data
+    },
+    onSuccess: () => {
+      toast.success("Email Sent successfully")
+      setForm({ subject: "", body: "" })
+      queryClient.invalidateQueries({ queryKey: ["emailLogs"] })
+    },
+    onError: (error: any) => {
+      const message = error?.response?.data.message || "Failed to send email"
+      toast.error(message)
+    }
+  })
+
   async function handleSubmit(e: React.FormEvent) {
     if (form.body.length < 0 || form.subject.length < 0) {
       return console.log("Form length is less than 0")
@@ -116,21 +131,8 @@ const SendEmailPage = () => {
       setResult({ type: "error", message: "Choose a client before sending." })
     }
     e.preventDefault()
-    try {
-      await api.post("/email/send-email", { clientId, ...form })
-      setForm({ subject: "", body: "" })
-    } catch (error: any) {
-      const message = error?.response?.data?.message || "failed to send mail"
-      toast.error(message)
-      console.log(error)
-    } finally {
-      setSubmit(false)
-    }
+    sendEmail()
   }
-
-  useEffect(() => {
-    getClients()
-  }, [])
 
   return (
     <div className="max-w-2xl">

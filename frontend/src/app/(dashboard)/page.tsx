@@ -2,9 +2,9 @@
 import { useEffect, useState, useCallback } from "react"
 import { timeAgo } from "../../lib/date"
 import type { EmailStatus } from "../../types/types"
-import toast from "react-hot-toast"
 import api from "@/lib/axios"
 import StatusBadge from "@/components/StatusBadge"
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
 
 interface EmailLog {
   id: string
@@ -33,44 +33,33 @@ const Cards: { key: keyof Summary; label: string; color: string; bg: string }[] 
 ]
 
 const DashboardPage = () => {
-  const [emails, setEmails] = useState<EmailLog[]>([])
-  const [loading, setLoading] = useState(false)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [skip, setSkip] = useState(0)
-  const [total, setTotal] = useState(0)
-  const [loadingMore, setLoadingMore] = useState(false)
 
-  const loadEmails = useCallback(async (skipVal = 0, append = false) => {
-    skipVal === 0 ? setLoading(true) : setLoadingMore(true)
-    try {
-      const { data } = await api.get(`/email/list-all-emails?take=${PAGE_SIZE}&skip=${skipVal}`)
-      if (data.success) setEmails((prev) => append ? [...prev, ...data.data] : data.data)
-      setTotal(data.total)
-      setSkip(skipVal)
-      console.log(data)
-    } catch (error: any) {
-      toast.error(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+    queryKey: ["emailsLogs"],
+    queryFn: async ({ pageParam }) => {
+      const url = `/email/list-all-emails?take=15${pageParam ? `&cursor=${pageParam}` : ""}`
+      const { data } = await api.get(url)
+      return data
+    },
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? null
+  })
 
-  useEffect(() => {
-    loadEmails(0)
-  }, [loadEmails])
-
-  const hasMore = skip + PAGE_SIZE < total
+  const emails = data?.pages.flatMap(page => page.data) ?? []
+  // const queryClient = useQueryClient()
+  // console.log(queryClient.getQueryCache().getAll())
 
   // derive summary from data — no extra API call needed
   const today = new Date().toDateString()
   const summary: Summary = {
-    sentToday: emails.filter(e => new Date(e.createdAt).toDateString() === today).length,
-    pending: emails.filter(e => e.status === "PENDING").length,
-    failed: emails.filter(e => e.status === "FAILED" || e.status === "BOUNCED").length,
+    sentToday: emails!.filter(e => new Date(e.createdAt).toDateString() === today).length,
+    pending: emails!.filter(e => e.status === "PENDING").length,
+    failed: emails!.filter(e => e.status === "FAILED" || e.status === "BOUNCED").length,
   }
 
-  const visible = emails.slice(0, visibleCount)
+  const visible = emails?.slice(0, visibleCount)
 
   const toggle = (id: string) =>
     setExpandedId(prev => (prev === id ? null : id))
@@ -92,7 +81,7 @@ const DashboardPage = () => {
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: card.color }} />
             </div>
             <p className="text-3xl font-semibold mt-3">
-              {loading ? "—" : summary[card.key]}
+              {isLoading ? "—" : summary[card.key]}
             </p>
           </div>
         ))}
@@ -113,7 +102,7 @@ const DashboardPage = () => {
           </span>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <p className="px-5 py-8 text-sm text-center" style={{ color: "var(--muted)" }}>
             Loading…
           </p>
@@ -207,16 +196,15 @@ const DashboardPage = () => {
         )}
 
         {/* load more */}
-        {hasMore && (
-          <div className="px-5 py-4 border-t" style={{ borderColor: "var(--border)" }}>
-            <button
-              onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
-              className="w-full text-sm font-medium py-2 rounded-lg border transition-colors hover:bg-black/[0.03]"
-              style={{ borderColor: "var(--border)", color: "var(--accent)" }}
-            >
-              {loadingMore ? "Loading…" : `Load more (${total - skip - PAGE_SIZE} remaining)`}
-            </button>
-          </div>
+        {hasNextPage && (
+          <button
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="w-full text-sm font-medium py-2 rounded-lg border transition-colors hover:bg-black/[0.03] disabled:opacity-60"
+            style={{ borderColor: "var(--border)", color: "var(--accent)" }}
+          >
+            {isFetchingNextPage ? "Loading…" : "Load more"}
+          </button>
         )}
       </div>
     </div>

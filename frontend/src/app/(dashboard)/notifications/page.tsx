@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react"
 import api from "@/lib/axios"
 import toast from "react-hot-toast"
 import { timeAgo } from "@/lib/date"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 type NotificationType = "MISSING_DOCUMENTS" | "EMAIL_FAILED" | "EMAIL_BOUNCED" | "GENERAL"
 
@@ -35,6 +36,7 @@ const TYPE_OPTIONS: { value: NotificationType; label: string }[] = [
 ]
 
 const NotificationsPage = () => {
+    const queryClient = useQueryClient()
     const [form, setForm] = useState<FormState>({
         type: "GENERAL",
         message: "",
@@ -42,63 +44,63 @@ const NotificationsPage = () => {
         assignedToId: "",
         scheduledAt: "",
     })
-    const [clients, setClients] = useState<Client[]>([])
-    const [notifications, setNotifications] = useState<Notification[]>([])
-    const [submitting, setSubmitting] = useState(false)
-    const [loading, setLoading] = useState(false)
 
     const updateField = (field: keyof FormState) =>
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
             setForm(prev => ({ ...prev, [field]: e.target.value }))
 
-    const loadClients = useCallback(async () => {
-        try {
-            const { data } = await api.get("/client/getAllClients   ")
-            if (data.success) setClients(data.data)
-        } catch { /* silent */ }
-    }, [])
 
-    const loadNotifications = useCallback(async () => {
-        setLoading(true)
-        try {
+    const { data: ClientsData } = useQuery({
+        queryKey: ["clients"],
+        queryFn: async () => {
+            const { data } = await api.get("/clients/getAllClients")
+            return data.data as Client[]
+        },
+        staleTime: 5 * 60 * 1000
+    })
+    const { data: notificationData, isLoading: loading } = useQuery({
+        queryKey: ["notifications"],
+        queryFn: async () => {
             const { data } = await api.get("/notification/get-all-notifications")
-            if (data.success) setNotifications(data.data)
-        } catch (e: any) {
-            toast.error(e.message)
-        } finally {
-            setLoading(false)
-        }
-    }, [])
+            return data.data as Notification[]
+        },
+        staleTime: 5 * 60 * 1000
+    })
 
-    useEffect(() => {
-        loadClients()
-        loadNotifications()
-    }, [loadClients, loadNotifications])
+    const clients = ClientsData ?? []
+    const notifications = notificationData ?? []
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!form.message.trim()) return toast.error("Message is required")
-        setSubmitting(true)
-        try {
-            const payload = {
+
+    const { mutate: createNotification, isPending: submitting } = useMutation({
+        mutationFn: async () => {
+            const payLoad = {
                 type: form.type,
                 message: form.message,
                 ...(form.clientId && { clientId: form.clientId }),
                 ...(form.assignedToId && { assignedToId: form.assignedToId }),
-                ...(form.scheduledAt && { scheduledAt: new Date(form.scheduledAt).toISOString() }),
+                ...(form.scheduledAt && { scheduledAt: new Date(form.scheduledAt).toISOString() })
+
             }
-            const { data } = await api.post("/notification/create-notification", payload)
-            if (data.success) {
-                toast.success("Notification created")
-                setForm({ type: "GENERAL", message: "", clientId: "", assignedToId: "", scheduledAt: "" })
-                loadNotifications()
-            }
-        } catch (e: any) {
-            toast.error(e?.response?.data?.message || "Failed to create notification")
-        } finally {
-            setSubmitting(false)
+            const { data } = await api.post("/notification/create-notification", payLoad)
+            return data
+        },
+        onSuccess: () => {
+            toast.success("Notification created successfully")
+            setForm({ type: "GENERAL", message: "", clientId: "", assignedToId: "", scheduledAt: "" })
+            queryClient.invalidateQueries({ queryKey: ["notifications"] })
+        },
+        onError: (e: any) => {
+            toast.error(e?.resposne?.data?.message || "Failed to create notification")
         }
+    })
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!form.message.trim()) return toast.error("Message is required")
+        createNotification()
     }
+
+
 
     const typeColors: Record<NotificationType, string> = {
         MISSING_DOCUMENTS: "var(--warning)",
