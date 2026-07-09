@@ -57,10 +57,12 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         try {
             await api.post("/auth/login", { email, password })
             await me()
+            toast.success("Login Successful")
 
         } catch (error: any) {
-            console.log(error)
-            toast.error(error)
+            const message = error?.resposne?.data?.message || "Failed to login"
+            console.log(message)
+            toast.error(message)
         }
 
     }, [me])

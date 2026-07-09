@@ -1,6 +1,8 @@
 import api from "@/lib/axios";
 import { Client } from "@/types/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function AddClientModal({
   onClose,
@@ -12,21 +14,30 @@ export default function AddClientModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient()
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
-    setError(null);
-    try {
-      const client = await api.post("/client/create-client", { name, email, company });
-      onCreated(client.data.data as Client | any );
-    } catch (err) {
-      setError("Couldn't add client.");
-    } finally {
-      setSubmitting(false);
+  const { mutate: createClient, isPending: submitting } = useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post("/client/create-client", { name, email, company })
+      return data.data
+    },
+    onSuccess: (client) => {
+      toast.success("Client created successfully")
+      queryClient.invalidateQueries({ queryKey: ["clients"] })
+      onCreated(client)
+    },
+    onError: (error) => {
+      const message = error?.message || "Failed to created client"
+      toast.error(message)
+      setError(message)
     }
+  })
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!name || !email || !company || name.length < 3 || !email.includes("@")) return toast.error("Please fill all fields correctly")
+    createClient()
   }
 
   return (
