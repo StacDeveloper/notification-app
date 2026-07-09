@@ -89,7 +89,7 @@ const SendEmailPage = () => {
   const { data: clientData, isLoading } = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const { data } = await api.get("/clients/getAllClients")
+      const { data } = await api.get("/client/getAllClients")
       return data.data as Client[]
     },
     staleTime: 5 * 60 * 1000
@@ -160,7 +160,7 @@ const SendEmailPage = () => {
           <input
             type="text"
             placeholder="Search clients by name, company, or email…"
-            value={selectedClient ? selectedClient.email : search}
+            value={selectedClient ? selectedClient?.email : search}
             onChange={(e) => {
               setSearch(e.target.value);
               setClientId("");
