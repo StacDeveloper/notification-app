@@ -1,6 +1,7 @@
 import { useAuthContext } from '@/context/AuthContext'
 import NotificationBell from './NotificationBell'
 import { useSidebarContext } from '@/context/SidebarContext'
+import ThemeToggle from './ThemeToggle'
 
 const PAGETitles: Record<string, string> = {
   "/": "Dashboard",
@@ -35,6 +36,7 @@ const Topbar = ({ pathname }: { pathname: string }) => {
       </div>
 
       <div className="flex items-center gap-4">
+        <ThemeToggle/>
         <NotificationBell />
         <div className="h-6 w-px" style={{ background: "var(--border)" }} />
         <div className="flex items-center gap-2.5">
